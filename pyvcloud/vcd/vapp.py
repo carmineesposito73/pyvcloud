@@ -804,6 +804,8 @@ class VApp(object):
                 password.
             - password_reset: (bool): (optional) True, if the administrator
                 password for this vm must be reset after first use.
+            - change_sid: (bool): (optional) True, if windows os sid must be
+                changed.
             - cust_script: (str): (optional) script to run on guest
                 customization.
             - network: (str): (optional) name of the vApp network to connect.
@@ -847,12 +849,15 @@ class VApp(object):
                         network=spec['network'])))
 
         needs_customization = 'disk_size' in spec or 'password' in spec or \
-            'cust_script' in spec or 'hostname' in spec
+            'cust_script' in spec or 'hostname' in spec or 'change_sid' in spec
         if needs_customization:
             guest_customization_param = E.GuestCustomizationSection(
                 E_OVF.Info(),
                 E.Enabled(True),
             )
+            if 'change_sid' in spec:
+                guest_customization_param.append(
+                    E.ChangeSid(spec['change_sid']))
             if 'password' in spec:
                 guest_customization_param.append(E.AdminPasswordEnabled(True))
                 guest_customization_param.append(E.AdminPasswordAuto(False))
