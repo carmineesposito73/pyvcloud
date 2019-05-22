@@ -637,7 +637,7 @@ class VApp(object):
                 return vm
         raise EntityNotFoundException('Can\'t find VM \'%s\'' % vm_name)
 
-    def add_disk_to_vm(self, vm_name, disk_size):
+    def add_disk_to_vm(self, vm_name, disk_size, disk_addr = None):
         """Add a virtual disk to a virtual machine in the vApp.
 
         It assumes that the vm has already at least one virtual hard disk
@@ -645,6 +645,7 @@ class VApp(object):
 
         :param str vm_name: name of the vm to be customized.
         :param int disk_size: size of the disk to be added, in MBs.
+        :param int disk_addr: address on parent, first disk has addr 0.
 
         :return: an object containing EntityType.TASK XML data which represents
             the asynchronous task that is creating the disk.
@@ -667,6 +668,9 @@ class VApp(object):
             last_disk['{' + NSMAP['rasd'] + '}AddressOnParent'])) + 1
         instance_id = int(str(
             last_disk['{' + NSMAP['rasd'] + '}InstanceID'])) + 1
+        if disk_addr is not None:
+            instance_id = instance_id - addr + disk_addr
+            addr = disk_addr
         new_disk['{' + NSMAP['rasd'] + '}AddressOnParent'] = addr
         new_disk['{' + NSMAP['rasd'] + '}ElementName'] = 'Hard disk %s' % addr
         new_disk['{' + NSMAP['rasd'] + '}InstanceID'] = instance_id
